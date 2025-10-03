@@ -60,3 +60,11 @@ A fully functional SQL analytics platform for Our World in Data with intelligent
 4. Deploy!
 
 The application is **100% client-side**, loads data directly from OWID GitHub repositories, and requires no backend server - perfect for free hosting! 🎉
+
+![logo](path/to/logo-256.png)
+
+![image](path/to/image-256.png)
+
+![image](path/to/image-512.png)
+
+![image](path/to/image.png)
