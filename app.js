@@ -30,6 +30,55 @@ const DATASETS = [
     url: 'https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv',
     description: 'COVID-19 cases, deaths, testing, and vaccinations',
     tableName: 'covid_data'
+  },
+  { 
+    id: 'literacy',
+    name: 'Literacy Rates',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Cross-country%20literacy%20rates%20-%20World%20Bank%2C%20CIA%20World%20Factbook%2C%20and%20other%20sources/Cross-country%20literacy%20rates%20-%20World%20Bank%2C%20CIA%20World%20Factbook%2C%20and%20other%20sources.csv',
+    description: 'Historical literacy rates by country (1475-present)',
+    tableName: 'literacy'
+  },
+  { 
+    id: 'education_spending',
+    name: 'Government Education Spending',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Government%20expenditure%20on%20education%20as%20%25%20of%20GDP%20-%20UNESCO/Government%20expenditure%20on%20education%20as%20%25%20of%20GDP%20-%20UNESCO.csv',
+    description: 'Public spending on education as % of GDP',
+    tableName: 'education_spending'
+  },
+  { 
+    id: 'learning_outcomes',
+    name: 'Learning Outcomes (Test Scores)',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Harmonized%20Test%20Scores%20(World%20Bank%20(2018))/Harmonized%20Test%20Scores%20(World%20Bank%20(2018)).csv',
+    description: 'Harmonized test scores from PISA, TIMSS, PIRLS',
+    tableName: 'learning_outcomes'
+  },
+  { 
+    id: 'poverty',
+    name: 'Poverty & Income',
+    url: 'https://raw.githubusercontent.com/owid/poverty-data/main/datasets/pip_percentiles.csv',
+    description: 'Poverty rates and income distribution by country',
+    tableName: 'poverty'
+  },
+  { 
+    id: 'years_of_schooling',
+    name: 'Years of Schooling',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Mean%20years%20of%20schooling%20-%20UNDP%20(2015)/Mean%20years%20of%20schooling%20-%20UNDP%20(2015).csv',
+    description: 'Average years of education completed',
+    tableName: 'years_schooling'
+  },
+  { 
+    id: 'school_enrollment',
+    name: 'School Enrollment Rates',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Primary%20school%20enrollment%20-%20World%20Bank%20(2017)/Primary%20school%20enrollment%20-%20World%20Bank%20(2017).csv',
+    description: 'Primary school enrollment rates',
+    tableName: 'enrollment'
+  },
+  { 
+    id: 'child_mortality',
+    name: 'Child Mortality',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Child%20mortality%20-%20IGME%20(2018)/Child%20mortality%20-%20IGME%20(2018).csv',
+    description: 'Under-5 mortality rates (health indicator)',
+    tableName: 'child_mortality'
   }
 ];
 
