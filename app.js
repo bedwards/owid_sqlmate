@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Database, FileCode, Image, AlertCircle, CheckCircle, Loader } from 'lucide-react';
-import * as Plotly from 'plotly';
+const { useState, useEffect, useRef } = React;
+const { Play, Database, FileCode, Image, AlertCircle, CheckCircle, Loader } = lucide;
 
-// SQL Keywords for autocomplete
 const SQL_KEYWORDS = [
   'SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'OFFSET',
   'JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'OUTER JOIN', 'ON',
@@ -11,7 +9,6 @@ const SQL_KEYWORDS = [
   'HAVING', 'ASC', 'DESC', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'
 ];
 
-// OWID Datasets
 const DATASETS = [
   { 
     id: 'co2_data',
@@ -36,7 +33,7 @@ const DATASETS = [
   }
 ];
 
-export default function OWIDAnalytics() {
+function OWIDAnalytics() {
   const [db, setDb] = useState(null);
   const [duckdb, setDuckdb] = useState(null);
   const [selectedDataset, setSelectedDataset] = useState(null);
@@ -52,7 +49,6 @@ export default function OWIDAnalytics() {
   const chartRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Initialize DuckDB
   useEffect(() => {
     initDuckDB();
   }, []);
@@ -61,7 +57,6 @@ export default function OWIDAnalytics() {
     try {
       setLoadingMessage('Initializing SQL engine...');
       
-      // Load DuckDB-WASM
       const DUCKDB_BUNDLES = {
         mvp: {
           mainModule: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-mvp.wasm',
@@ -93,7 +88,6 @@ export default function OWIDAnalytics() {
     }
   };
 
-  // Load dataset into DuckDB
   const loadDataset = async (dataset) => {
     if (!db) {
       setError('SQL engine not initialized');
@@ -106,21 +100,16 @@ export default function OWIDAnalytics() {
     setLoadingMessage(`Loading ${dataset.name}...`);
     
     try {
-      // Drop table if exists
       try {
         await db.query(`DROP TABLE IF EXISTS ${dataset.tableName}`);
-      } catch (e) {
-        // Ignore if table doesn't exist
-      }
+      } catch (e) {}
 
-      // Load CSV directly into DuckDB
       setLoadingMessage('Downloading data from Our World in Data...');
       await db.query(`
         CREATE TABLE ${dataset.tableName} AS 
         SELECT * FROM read_csv_auto('${dataset.url}')
       `);
       
-      // Get column names
       setLoadingMessage('Analyzing data structure...');
       const columnsResult = await db.query(`
         SELECT column_name 
@@ -131,7 +120,6 @@ export default function OWIDAnalytics() {
       const columnNames = columnsResult.toArray().map(row => row.column_name);
       setColumns(columnNames);
       
-      // Get row count
       const countResult = await db.query(`SELECT COUNT(*) as count FROM ${dataset.tableName}`);
       const rowCount = countResult.toArray()[0].count;
       
@@ -149,7 +137,6 @@ export default function OWIDAnalytics() {
     setLoading(false);
   };
 
-  // Execute SQL query
   const executeQuery = async () => {
     if (!db || !selectedDataset) return;
     
@@ -181,7 +168,6 @@ export default function OWIDAnalytics() {
     setLoading(false);
   };
 
-  // Smart chart generation
   const generateChart = (result) => {
     if (!result || !result.data.length || !chartRef.current) return;
     
@@ -198,7 +184,6 @@ export default function OWIDAnalytics() {
   const analyzeDataForChart = (data, columns) => {
     if (!data.length || !columns.length) return { data: [], layout: {} };
 
-    // Analyze column types
     const numericCols = columns.filter(col => {
       const val = data[0][col];
       return typeof val === 'number' && !col.toLowerCase().includes('year') && 
@@ -214,13 +199,11 @@ export default function OWIDAnalytics() {
       col.toLowerCase().includes('year') || col.toLowerCase().includes('date') || col.toLowerCase().includes('time')
     );
 
-    // Detect aggregations in query
     const queryUpper = sqlQuery.toUpperCase();
     const hasGroupBy = queryUpper.includes('GROUP BY');
     const hasAggregation = /COUNT|SUM|AVG|MIN|MAX/i.test(sqlQuery);
     const isTimeSeries = timeCols.length > 0 && numericCols.length > 0;
     
-    // Smart chart type selection
     let chartType = 'scatter';
     let xCol = columns[0];
     let yCol = columns.length > 1 ? columns[1] : columns[0];
@@ -319,7 +302,6 @@ export default function OWIDAnalytics() {
     return `${yCol} vs ${xCol}`;
   };
 
-  // Autocomplete
   const handleInputChange = (e) => {
     const value = e.target.value;
     const cursor = e.target.selectionStart;
@@ -371,7 +353,6 @@ export default function OWIDAnalytics() {
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
-  // Export functions
   const exportPNG = () => {
     if (!chartRef.current) return;
     Plotly.downloadImage(chartRef.current, {
@@ -426,12 +407,6 @@ fig = px.line(
     title='${generateChartTitle(queryResult.columns[0], queryResult.columns[1] || queryResult.columns[0], 'line')}'
 )
 fig.show()
-
-# Or use Plotly directly for more control
-# import plotly.graph_objects as go
-# fig = go.Figure()
-# fig.add_trace(go.Scatter(x=result['${queryResult.columns[0]}'], y=result['${queryResult.columns[1] || queryResult.columns[0]}']))
-# fig.show()
 `;
     
     const blob = new Blob([code], { type: 'text/plain' });
@@ -468,10 +443,9 @@ fig.show()
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
           <div className="flex items-center gap-3 mb-2">
-            <Database className="text-blue-600" size={32} />
+            <span className="text-4xl">🌍</span>
             <h1 className="text-3xl font-bold text-gray-800">
               Our World in Data SQL Analytics
             </h1>
@@ -481,35 +455,33 @@ fig.show()
           </p>
           {!db && (
             <div className="mt-4 flex items-center gap-2 text-yellow-700 bg-yellow-50 p-3 rounded-lg">
-              <Loader className="animate-spin" size={20} />
+              <span>⏳</span>
               <span>Initializing SQL engine...</span>
             </div>
           )}
         </div>
 
-        {/* Status Messages */}
         {loadingMessage && (
           <div className="bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg mb-6 flex items-center gap-3">
-            <Loader className="animate-spin" size={20} />
+            <span>⏳</span>
             <span>{loadingMessage}</span>
           </div>
         )}
 
         {error && (
           <div className="bg-red-50 border border-red-300 text-red-700 p-4 rounded-lg mb-6 flex items-start gap-3">
-            <AlertCircle size={20} className="mt-0.5" />
+            <span>⚠️</span>
             <div className="flex-1">{error}</div>
           </div>
         )}
 
         {success && (
           <div className="bg-green-50 border border-green-300 text-green-700 p-4 rounded-lg mb-6 flex items-center gap-3">
-            <CheckCircle size={20} />
+            <span>✓</span>
             <span>{success}</span>
           </div>
         )}
 
-        {/* Dataset Selection */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
           <h2 className="text-xl font-bold mb-4 text-gray-800">Select Dataset</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -533,7 +505,6 @@ fig.show()
 
         {selectedDataset && (
           <>
-            {/* SQL Editor */}
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-gray-800">SQL Query Editor</h2>
@@ -577,8 +548,7 @@ fig.show()
                   disabled={loading || !db}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 font-semibold shadow-md transition-all"
                 >
-                  <Play size={20} />
-                  {loading ? 'Executing...' : 'Run Query'}
+                  ▶ {loading ? 'Executing...' : 'Run Query'}
                 </button>
                 
                 <div className="text-sm text-gray-500 flex items-center px-3">
@@ -587,48 +557,41 @@ fig.show()
               </div>
             </div>
 
-            {/* Results */}
             {queryResult && (
               <>
-                {/* Chart */}
                 <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
                   <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
                     <h2 className="text-xl font-bold text-gray-800">Visualization</h2>
                     <div className="flex gap-2">
                       <button
                         onClick={exportPNG}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm font-semibold shadow-md"
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold shadow-md"
                       >
-                        <Image size={16} />
-                        PNG
+                        📊 PNG
                       </button>
                       <button
                         onClick={exportSVG}
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 text-sm font-semibold shadow-md"
+                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-semibold shadow-md"
                       >
-                        <FileCode size={16} />
-                        SVG
+                        📄 SVG
                       </button>
                       <button
                         onClick={exportNotebook}
-                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 text-sm font-semibold shadow-md"
+                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-semibold shadow-md"
                       >
-                        <FileCode size={16} />
-                        Python
+                        💻 Python
                       </button>
                       <button
                         onClick={downloadData}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2 text-sm font-semibold shadow-md"
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-semibold shadow-md"
                       >
-                        <Database size={16} />
-                        CSV
+                        💾 CSV
                       </button>
                     </div>
                   </div>
                   <div ref={chartRef} className="w-full" style={{ height: '500px' }} />
                 </div>
 
-                {/* Data Table */}
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
                   <h2 className="text-xl font-bold mb-4 text-gray-800">
                     Query Results ({queryResult.data.length.toLocaleString()} rows)
@@ -670,7 +633,6 @@ fig.show()
           </>
         )}
 
-        {/* Footer */}
         <div className="mt-8 text-center text-gray-500 text-sm">
           <p>Powered by DuckDB-WASM • Data from Our World in Data • Visualizations by Plotly</p>
           <p className="mt-1">Full SQL support: JOIN, GROUP BY, subqueries, window functions, and more!</p>
@@ -679,3 +641,5 @@ fig.show()
     </div>
   );
 }
+
+ReactDOM.render(<OWIDAnalytics />, document.getElementById('root'));
