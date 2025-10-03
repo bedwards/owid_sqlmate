@@ -37,27 +37,6 @@ const DATASETS = [
     url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Cross-country%20literacy%20rates%20-%20World%20Bank%2C%20CIA%20World%20Factbook%2C%20and%20other%20sources/Cross-country%20literacy%20rates%20-%20World%20Bank%2C%20CIA%20World%20Factbook%2C%20and%20other%20sources.csv',
     description: 'Historical literacy rates by country (1475-present)',
     tableName: 'literacy'
-  },
-  { 
-    id: 'education_quality',
-    name: 'Education Quality (Test Scores)',
-    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Average%20years%20of%20schooling%20-%20Lee-Lee%20(2016)/Average%20years%20of%20schooling%20-%20Lee-Lee%20(2016).csv',
-    description: 'Average years of schooling completed',
-    tableName: 'education_quality'
-  },
-  { 
-    id: 'child_mortality',
-    name: 'Child Mortality Rates',
-    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Child%20mortality%20rate%20-%20IGME%20(2015)/Child%20mortality%20rate%20-%20IGME%20(2015).csv',
-    description: 'Under-5 mortality rates by country',
-    tableName: 'child_mortality'
-  },
-  { 
-    id: 'life_expectancy',
-    name: 'Life Expectancy',
-    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Life%20expectancy%20-%20Gapminder%2C%20UN/Life%20expectancy%20-%20Gapminder%2C%20UN.csv',
-    description: 'Life expectancy at birth',
-    tableName: 'life_expectancy'
   }
 ];
 

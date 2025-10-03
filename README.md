@@ -45,22 +45,10 @@ WHERE country IN ('United States', 'China', 'Germany')
 
 ### Education
 
-```
--- Literacy vs Education Spending
-SELECT l.Entity as country, l.Year, 
-       l."Literacy rate - World Bank (2016)" as literacy,
-       e."Government expenditure on education as % of GDP" as edu_spending
-FROM literacy l
-JOIN education_spending e ON l.Entity = e.Entity AND l.Year = e.Year
-WHERE l.Year >= 2000
-ORDER BY l.Year DESC;
+Literacy
 
--- Countries with highest learning outcomes
-SELECT Entity, Year, "Harmonized Test Scores" as test_score
-FROM learning_outcomes
-WHERE Year >= 2010
-ORDER BY test_score DESC
-LIMIT 20;
+```
+SELECT * FROM literacy WHERE Entity = 'India'
 ```
 
 ## Claude session
