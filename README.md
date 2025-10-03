@@ -6,6 +6,8 @@ A fully functional SQL analytics platform for Our World in Data with intelligent
 
 ```
 SELECT * FROM energy_data WHERE country = 'Afghanistan' LIMIT 100
+
+SELECT country FROM energy_data GROUP BY country
 ```
 
 ## ✨ Key Features
