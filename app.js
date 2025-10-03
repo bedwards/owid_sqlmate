@@ -57,33 +57,21 @@ function OWIDAnalytics() {
     try {
       setLoadingMessage('Initializing SQL engine...');
       
-      const DUCKDB_BUNDLES = {
-        mvp: {
-          mainModule: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-mvp.wasm',
-          mainWorker: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser-mvp.worker.js',
-        },
-        eh: {
-          mainModule: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-eh.wasm',
-          mainWorker: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser-eh.worker.js',
-        },
-      };
-
-      const bundle = await window.duckdb.selectBundle(DUCKDB_BUNDLES);
-      const worker = new Worker(bundle.mainWorker);
-      const logger = new window.duckdb.ConsoleLogger();
-      const duckdbInstance = new window.duckdb.AsyncDuckDB(logger, worker);
-      await duckdbInstance.instantiate(bundle.mainModule);
+      // Initialize sql.js
+      const SQL = await initSqlJs({
+        locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+      });
       
-      const conn = await duckdbInstance.connect();
+      const database = new SQL.Database();
       
-      setDuckdb(duckdbInstance);
-      setDb(conn);
+      setDb(database);
       setSuccess('SQL engine ready!');
       setLoadingMessage('');
       
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError('Failed to initialize SQL engine: ' + err.message);
+      console.error('SQL.js init error:', err);
       setLoadingMessage('');
     }
   };
@@ -100,37 +88,81 @@ function OWIDAnalytics() {
     setLoadingMessage(`Loading ${dataset.name}...`);
     
     try {
+      // Drop table if exists
       try {
-        await db.query(`DROP TABLE IF EXISTS ${dataset.tableName}`);
+        db.run(`DROP TABLE IF EXISTS ${dataset.tableName}`);
       } catch (e) {}
 
+      // Fetch CSV data
       setLoadingMessage('Downloading data from Our World in Data...');
-      await db.query(`
-        CREATE TABLE ${dataset.tableName} AS 
-        SELECT * FROM read_csv_auto('${dataset.url}')
-      `);
+      const response = await fetch(dataset.url);
+      const csvText = await response.text();
       
+      // Parse CSV
+      setLoadingMessage('Parsing CSV data...');
+      const lines = csvText.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      
+      // Create table
+      const columnDefs = headers.map(h => `"${h}" TEXT`).join(', ');
+      db.run(`CREATE TABLE ${dataset.tableName} (${columnDefs})`);
+      
+      // Insert data in batches
+      setLoadingMessage('Loading data into database...');
+      const batchSize = 1000;
+      
+      for (let i = 1; i < lines.length; i += batchSize) {
+        const batch = lines.slice(i, i + batchSize);
+        const values = batch.map(line => {
+          // Simple CSV parsing (handles basic cases)
+          const values = [];
+          let current = '';
+          let inQuotes = false;
+          
+          for (let char of line) {
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              values.push(current.trim().replace(/^"|"$/g, ''));
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          values.push(current.trim().replace(/^"|"$/g, ''));
+          
+          return '(' + values.map(v => `'${v.replace(/'/g, "''")}'`).join(',') + ')';
+        }).join(',');
+        
+        if (values) {
+          const placeholders = headers.map(h => '?').join(',');
+          db.run(`INSERT INTO ${dataset.tableName} VALUES ${values}`);
+        }
+        
+        if (i % 5000 === 0) {
+          setLoadingMessage(`Loading data... ${Math.min(i, lines.length - 1).toLocaleString()} / ${(lines.length - 1).toLocaleString()} rows`);
+        }
+      }
+      
+      // Get column info
       setLoadingMessage('Analyzing data structure...');
-      const columnsResult = await db.query(`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = '${dataset.tableName}'
-      `);
-      
-      const columnNames = columnsResult.toArray().map(row => row.column_name);
+      const columnsResult = db.exec(`PRAGMA table_info(${dataset.tableName})`);
+      const columnNames = columnsResult[0].values.map(row => row[1]);
       setColumns(columnNames);
       
-      const countResult = await db.query(`SELECT COUNT(*) as count FROM ${dataset.tableName}`);
-      const rowCount = countResult.toArray()[0].count;
+      // Get row count
+      const countResult = db.exec(`SELECT COUNT(*) as count FROM ${dataset.tableName}`);
+      const rowCount = countResult[0].values[0][0];
       
       setSelectedDataset(dataset);
       setSqlQuery(`SELECT * FROM ${dataset.tableName} LIMIT 100`);
-      setSuccess(`✓ Loaded ${rowCount.toLocaleString()} rows with ${columnNames.length} columns`);
+      setSuccess(`✓ Loaded ${parseInt(rowCount).toLocaleString()} rows with ${columnNames.length} columns`);
       setLoadingMessage('');
       
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
       setError('Failed to load dataset: ' + err.message);
+      console.error('Load error:', err);
       setLoadingMessage('');
     }
     
@@ -146,17 +178,34 @@ function OWIDAnalytics() {
     setLoadingMessage('Executing query...');
     
     try {
-      const result = await db.query(sqlQuery);
-      const rows = result.toArray();
-      const cols = result.schema.fields.map(f => f.name);
+      const result = db.exec(sqlQuery);
       
-      setQueryResult({ data: rows, columns: cols });
+      if (!result || result.length === 0) {
+        setQueryResult({ data: [], columns: [] });
+        setSuccess('✓ Query returned 0 rows');
+        setLoadingMessage('');
+        setLoading(false);
+        return;
+      }
+      
+      const columns = result[0].columns;
+      const rows = result[0].values.map(row => {
+        const obj = {};
+        columns.forEach((col, idx) => {
+          // Try to convert to number if possible
+          const val = row[idx];
+          obj[col] = isNaN(val) || val === '' ? val : Number(val);
+        });
+        return obj;
+      });
+      
+      setQueryResult({ data: rows, columns: columns });
       setSuccess(`✓ Query returned ${rows.length} rows`);
       setLoadingMessage('');
       
       setTimeout(() => {
         setSuccess(null);
-        generateChart({ data: rows, columns: cols });
+        generateChart({ data: rows, columns: columns });
       }, 1000);
       
     } catch (err) {
