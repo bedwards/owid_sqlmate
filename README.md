@@ -4,11 +4,41 @@ A fully functional SQL analytics platform for Our World in Data with intelligent
 
 ## Queries that work
 
-```
-SELECT * FROM energy_data WHERE country = 'Afghanistan' LIMIT 100
+### Simple query
 
+```
+SELECT * FROM energy_data WHERE country = 'United States' LIMIT 100
+```
+
+### List countries
+
+```
 SELECT country FROM energy_data GROUP BY country
 ```
+
+### Complex aggregations
+
+```
+SELECT country, AVG(coal_consumption) as avg_coal
+FROM energy_data 
+WHERE year >= 2010
+GROUP BY country 
+ORDER BY avg_coal DESC 
+LIMIT 20
+```
+
+![chart-agg](chart-agg.png)
+
+### Window functions!
+
+```
+SELECT country, year, gdp,
+       AVG(gdp) OVER (PARTITION BY country ORDER BY year ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) as moving_avg
+FROM energy_data
+WHERE country IN ('United States', 'China', 'Germany')
+```
+
+![chart-window](chart-window.png)
 
 ## ✨ Key Features
 
