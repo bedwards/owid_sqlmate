@@ -20,8 +20,11 @@ SELECT country FROM energy_data GROUP BY country
 
 ```
 SELECT country, AVG(coal_consumption) as avg_coal
-FROM energy_data 
+FROM energy_data
 WHERE year >= 2010
+AND iso_code IS NOT NULL 
+AND LENGTH(iso_code) = 3
+AND iso_code NOT LIKE '%OWID%'
 GROUP BY country 
 ORDER BY avg_coal DESC 
 LIMIT 20
@@ -39,6 +42,10 @@ WHERE country IN ('United States', 'China', 'Germany')
 ```
 
 ![chart-window](chart-window.png)
+
+## Claude session
+
+[Transcript](claude.pdf)
 
 ## ✨ Key Features
 
