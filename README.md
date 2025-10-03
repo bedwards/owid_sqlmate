@@ -43,12 +43,16 @@ WHERE country IN ('United States', 'China', 'Germany')
 
 ![chart-window](chart-window.png)
 
-### Education
-
-Literacy
+### Literacy
 
 ```
 SELECT * FROM literacy WHERE Entity = 'India'
+```
+
+### CO2
+
+```
+SELECT year, co2_growth_prct FROM co2_data WHERE country = 'India'
 ```
 
 ## Claude session
