@@ -147,51 +147,56 @@ function OWIDAnalytics() {
       const response = await fetch(dataset.url);
       const csvText = await response.text();
       
-      // Parse CSV
+      // Parse CSV with PapaParse
       setLoadingMessage('Parsing CSV data...');
-      const lines = csvText.trim().split('\n');
-      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      const parseResult = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: false, // Keep everything as strings for SQL
+        transformHeader: (header) => header.trim()
+      });
       
-      // Create table
+      if (parseResult.errors.length > 0) {
+        console.warn('CSV parsing warnings:', parseResult.errors);
+      }
+      
+      const headers = parseResult.meta.fields;
+      const rows = parseResult.data;
+      
+      if (!headers || headers.length === 0) {
+        throw new Error('No columns found in CSV');
+      }
+      
+      // Create table with quoted column names to handle spaces/special chars
       const columnDefs = headers.map(h => `"${h}" TEXT`).join(', ');
       db.run(`CREATE TABLE ${dataset.tableName} (${columnDefs})`);
+      
+      // Prepare insert statement
+      const placeholders = headers.map(() => '?').join(',');
+      const insertStmt = db.prepare(`INSERT INTO ${dataset.tableName} VALUES (${placeholders})`);
       
       // Insert data in batches
       setLoadingMessage('Loading data into database...');
       const batchSize = 1000;
       
-      for (let i = 1; i < lines.length; i += batchSize) {
-        const batch = lines.slice(i, i + batchSize);
-        const values = batch.map(line => {
-          // Simple CSV parsing (handles basic cases)
-          const values = [];
-          let current = '';
-          let inQuotes = false;
-          
-          for (let char of line) {
-            if (char === '"') {
-              inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-              values.push(current.trim().replace(/^"|"$/g, ''));
-              current = '';
-            } else {
-              current += char;
-            }
+      for (let i = 0; i < rows.length; i += batchSize) {
+        const batch = rows.slice(i, Math.min(i + batchSize, rows.length));
+        
+        batch.forEach(row => {
+          const values = headers.map(h => row[h] === undefined || row[h] === null ? '' : String(row[h]));
+          try {
+            insertStmt.run(values);
+          } catch (e) {
+            console.error('Error inserting row:', e, row);
           }
-          values.push(current.trim().replace(/^"|"$/g, ''));
-          
-          return '(' + values.map(v => `'${v.replace(/'/g, "''")}'`).join(',') + ')';
-        }).join(',');
+        });
         
-        if (values) {
-          const placeholders = headers.map(h => '?').join(',');
-          db.run(`INSERT INTO ${dataset.tableName} VALUES ${values}`);
-        }
-        
-        if (i % 5000 === 0) {
-          setLoadingMessage(`Loading data... ${Math.min(i, lines.length - 1).toLocaleString()} / ${(lines.length - 1).toLocaleString()} rows`);
+        if (i % 5000 === 0 && i > 0) {
+          setLoadingMessage(`Loading data... ${i.toLocaleString()} / ${rows.length.toLocaleString()} rows`);
         }
       }
+      
+      insertStmt.free();
       
       // Get column info
       setLoadingMessage('Analyzing data structure...');
