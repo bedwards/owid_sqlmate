@@ -39,46 +39,25 @@ const DATASETS = [
     tableName: 'literacy'
   },
   { 
-    id: 'education_spending',
-    name: 'Government Education Spending',
-    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Government%20expenditure%20on%20education%20as%20%25%20of%20GDP%20-%20UNESCO/Government%20expenditure%20on%20education%20as%20%25%20of%20GDP%20-%20UNESCO.csv',
-    description: 'Public spending on education as % of GDP',
-    tableName: 'education_spending'
-  },
-  { 
-    id: 'learning_outcomes',
-    name: 'Learning Outcomes (Test Scores)',
-    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Harmonized%20Test%20Scores%20(World%20Bank%20(2018))/Harmonized%20Test%20Scores%20(World%20Bank%20(2018)).csv',
-    description: 'Harmonized test scores from PISA, TIMSS, PIRLS',
-    tableName: 'learning_outcomes'
-  },
-  { 
-    id: 'poverty',
-    name: 'Poverty & Income',
-    url: 'https://raw.githubusercontent.com/owid/poverty-data/main/datasets/pip_percentiles.csv',
-    description: 'Poverty rates and income distribution by country',
-    tableName: 'poverty'
-  },
-  { 
-    id: 'years_of_schooling',
-    name: 'Years of Schooling',
-    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Mean%20years%20of%20schooling%20-%20UNDP%20(2015)/Mean%20years%20of%20schooling%20-%20UNDP%20(2015).csv',
-    description: 'Average years of education completed',
-    tableName: 'years_schooling'
-  },
-  { 
-    id: 'school_enrollment',
-    name: 'School Enrollment Rates',
-    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Primary%20school%20enrollment%20-%20World%20Bank%20(2017)/Primary%20school%20enrollment%20-%20World%20Bank%20(2017).csv',
-    description: 'Primary school enrollment rates',
-    tableName: 'enrollment'
+    id: 'education_quality',
+    name: 'Education Quality (Test Scores)',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Average%20years%20of%20schooling%20-%20Lee-Lee%20(2016)/Average%20years%20of%20schooling%20-%20Lee-Lee%20(2016).csv',
+    description: 'Average years of schooling completed',
+    tableName: 'education_quality'
   },
   { 
     id: 'child_mortality',
-    name: 'Child Mortality',
-    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Child%20mortality%20-%20IGME%20(2018)/Child%20mortality%20-%20IGME%20(2018).csv',
-    description: 'Under-5 mortality rates (health indicator)',
+    name: 'Child Mortality Rates',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Child%20mortality%20rate%20-%20IGME%20(2015)/Child%20mortality%20rate%20-%20IGME%20(2015).csv',
+    description: 'Under-5 mortality rates by country',
     tableName: 'child_mortality'
+  },
+  { 
+    id: 'life_expectancy',
+    name: 'Life Expectancy',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Life%20expectancy%20-%20Gapminder%2C%20UN/Life%20expectancy%20-%20Gapminder%2C%20UN.csv',
+    description: 'Life expectancy at birth',
+    tableName: 'life_expectancy'
   }
 ];
 
