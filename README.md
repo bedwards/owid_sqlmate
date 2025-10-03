@@ -43,6 +43,26 @@ WHERE country IN ('United States', 'China', 'Germany')
 
 ![chart-window](chart-window.png)
 
+### Education
+
+```
+-- Literacy vs Education Spending
+SELECT l.Entity as country, l.Year, 
+       l."Literacy rate - World Bank (2016)" as literacy,
+       e."Government expenditure on education as % of GDP" as edu_spending
+FROM literacy l
+JOIN education_spending e ON l.Entity = e.Entity AND l.Year = e.Year
+WHERE l.Year >= 2000
+ORDER BY l.Year DESC;
+
+-- Countries with highest learning outcomes
+SELECT Entity, Year, "Harmonized Test Scores" as test_score
+FROM learning_outcomes
+WHERE Year >= 2010
+ORDER BY test_score DESC
+LIMIT 20;
+```
+
 ## Claude session
 
 [Transcript](claude.pdf) 89-page PDF!!!
@@ -69,6 +89,42 @@ WHERE country IN ('United States', 'China', 'Germany')
 - COVID-19 data
 - Energy data
 - Loads directly from Our World in Data repositories
+
+**YES!** You can use ANY OWID dataset from their GitHub repositories! Here are the main ones:
+
+## 📊 Available OWID Datasets:
+
+### **Already in the app:**
+1. `co2_data` - CO2 and greenhouse gas emissions
+2. `energy_data` - Energy production and consumption
+3. `covid_data` - COVID-19 pandemic data
+
+### **Other major datasets you can add:**
+
+**Climate & Environment:**
+- `https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20-%20EM-DAT/Natural%20disasters%20-%20EM-DAT.csv`
+
+**Health:**
+- Life expectancy: `https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Life%20expectancy%20at%20birth%20(Gapminder%2C%20UN)/Life%20expectancy%20at%20birth%20(Gapminder%2C%20UN).csv`
+- Mortality rates: Various causes available
+
+**Economics:**
+- GDP data: `https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/GDP%20per%20capita%20(Maddison%202020)/GDP%20per%20capita%20(Maddison%202020).csv`
+
+**To add any dataset**, just add it to the `DATASETS` array in `app.js`:
+
+```javascript
+const DATASETS = [
+  // ... existing datasets ...
+  { 
+    id: 'life_expectancy',
+    name: 'Life Expectancy',
+    url: 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Life%20expectancy%20at%20birth%20(Gapminder%2C%20UN)/Life%20expectancy%20at%20birth%20(Gapminder%2C%20UN).csv',
+    description: 'Life expectancy at birth by country',
+    tableName: 'life_expectancy'
+  }
+];
+```
 
 ## 🚀 Deployment Instructions
 
