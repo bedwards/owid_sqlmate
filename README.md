@@ -2,6 +2,12 @@
 
 A fully functional SQL analytics platform for Our World in Data with intelligent chart generation and multiple export options!I've created a fully functional **Our World in Data SQL Analytics Platform** with:
 
+## Queries that work
+
+```
+SELECT * FROM energy_data WHERE country = 'Afghanistan' LIMIT 100
+```
+
 ## ✨ Key Features
 
 **1. SQL Interface with Auto-complete**

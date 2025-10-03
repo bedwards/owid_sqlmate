@@ -30,7 +30,8 @@ function OWIDAnalytics() {
         const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
         const data = [];
         
-        for (let i = 1; i < Math.min(lines.length, 10000); i++) {
+        // for (let i = 1; i < Math.min(lines.length, 10000); i++) {
+        for (let i = 1; i < lines.length; i++) {
             const values = lines[i].split(',');
             const row = {};
             headers.forEach((header, idx) => {
