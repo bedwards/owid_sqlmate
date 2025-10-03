@@ -45,7 +45,7 @@ WHERE country IN ('United States', 'China', 'Germany')
 
 ## Claude session
 
-[Transcript](claude.pdf)
+[Transcript](claude.pdf) 89-page PDF!!!
 
 ## ✨ Key Features
 
